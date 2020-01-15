@@ -59,18 +59,26 @@ dependencies {
     compileOnly('org.apache.commons:commons-lang3')
     compileOnly('org.apache.commons:commons-collections4')
     //compileOnly("org.apache.commons:commons-pool2:2.5.0")
-    compile("commons-io:commons-io:2.2")
+    compile("commons-io:commons-io")
+    compile("commons-codec:commons-codec")
+    
+    // swagger dependency
+    compile("io.springfox:springfox-swagger2:2.8.0")
+    compile("io.springfox:springfox-swagger-ui:2.8.0")
     
     //spring boot
-    compileOnly('org.springframework.boot:spring-boot-starter-web'){
+    compile('org.springframework.boot:spring-boot-starter-web'){
     	 exclude module:':spring-boot-starter-logging'
     }
-    compileOnly('org.springframework.boot:spring-boot-starter-aop')
-    compileOnly('org.springframework.boot:spring-boot-starter-log4j2')
-
+    compile('org.springframework.boot:spring-boot-starter-aop')
+    compile('org.springframework.boot:spring-boot-starter-log4j2')
+    compile("org.springframework.boot:spring-boot-starter-actuator")
+    compile("org.springframework.boot:spring-boot-autoconfigure")
+    
     //spring cloud
     //log4j2 输出traceid
     compileOnly('org.springframework.cloud:spring-cloud-starter-sleuth')
+    compileOnly("org.springframework.cloud:spring-cloud-starter-openfeign")
     
     // test dependency
     compileOnly("org.springframework.boot:spring-boot-starter-test")
