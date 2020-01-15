@@ -1,0 +1,78 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        maven {
+            url 'http://testm.ahaschool.com:9200/nexus/content/groups/public/'
+        }
+    }
+}
+plugins {
+    id 'java'
+    id 'idea'
+    id 'eclipse'
+    id 'maven'
+    id 'org.springframework.boot' version '2.0.5.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.7.RELEASE'
+}
+repositories {
+    mavenLocal()
+    maven {
+        mavenLocal()
+        url 'http://testm.ahaschool.com:9200/nexus/content/groups/public/'
+    }
+}
+group 'com.tech.base.support'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+[compileJava, compileTestJava].each()
+{
+    //it.options.compilerArgs += ["-Xlint:unchecked", "-Xlint:deprecation", "-Xlint:-options","-Xlint:all"]
+    it.options.encoding = "UTF-8"
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs = ["src/main/resources"]
+        }
+    }
+}
+//pringdependencyManager
+dependencyManagement {
+    //Maven bom
+    imports {
+        mavenBom 'com.tech.base.support:spring-cloud-base-bom:0.0.2-RELEASE'
+    }
+}
+//填写的依赖子项目共享依赖配置
+dependencies {
+	//https://github.com/looly/hutool
+	compile("cn.hutool:hutool-core")
+	compileOnly 'org.projectlombok:lombok:1.18.2'
+	
+	//kafka
+    compileOnly('org.springframework.kafka:spring-kafka:2.1.7.RELEASE')
+    
+    // 3-part tool dependency
+    compileOnly('org.apache.commons:commons-lang3')
+    compileOnly('org.apache.commons:commons-collections4')
+    //compileOnly("org.apache.commons:commons-pool2:2.5.0")
+    compile("commons-io:commons-io:2.2")
+    
+    //spring boot
+    compileOnly('org.springframework.boot:spring-boot-starter-web'){
+    	 exclude module:':spring-boot-starter-logging'
+    }
+    compileOnly('org.springframework.boot:spring-boot-starter-aop')
+    compileOnly('org.springframework.boot:spring-boot-starter-log4j2')
+
+    //spring cloud
+    //log4j2 输出traceid
+    compileOnly('org.springframework.cloud:spring-cloud-starter-sleuth')
+    
+    // test dependency
+    compileOnly("org.springframework.boot:spring-boot-starter-test")
+    //testCompile("org.mybatis.generator:mybatis-generator-core:1.3.7")
+}
