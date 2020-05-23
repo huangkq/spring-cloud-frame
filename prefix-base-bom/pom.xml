@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>com.tech.base.support</groupId>
 	<artifactId>spring-cloud-base-bom</artifactId>
-	<version>0.0.2-RELEASE</version>
+	<version>0.0.3-RELEASE</version>
 	<packaging>pom</packaging>
 	<description>基础支持</description>
 
@@ -49,6 +49,16 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-collections4</artifactId>
 				<version>4.4</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-pool2</artifactId>
+				<version>2.5.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.redisson</groupId>
+				<artifactId>redisson</artifactId>
+				<version>3.9.1</version>
 			</dependency>
 			<!-- jackson -->
 			<dependency>
