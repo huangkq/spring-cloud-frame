@@ -6,10 +6,15 @@ import com.tech.base.utils.EnvThreadLocal;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class EnvInterceptor implements HandlerInterceptor {
+
+    private final static String X_TRACE_ID = "x-trace-id";
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
@@ -24,7 +29,7 @@ public class EnvInterceptor implements HandlerInterceptor {
 
     public XEnvDto getXEnvDto(HttpServletRequest request) {
         XEnvDto xEnvDto = new XEnvDto();
-        xEnvDto.setTraceId(request.getHeader("x-trace-root-id"));
+        xEnvDto.setTraceId(getTraceId(request));
         xEnvDto.setToken(request.getHeader("x-token"));
         xEnvDto.setUtmSource(request.getHeader("x-env-utm-source"));
         xEnvDto.setUtmMedium(request.getHeader("x-env-utm-medium"));
@@ -45,5 +50,13 @@ public class EnvInterceptor implements HandlerInterceptor {
         xEnvDto.setVersion(request.getHeader("version"));
         xEnvDto.setEquipment(request.getHeader("x-equipment"));
         return xEnvDto;
+    }
+
+    private String getTraceId(HttpServletRequest request) {
+        return Optional.ofNullable(request.getHeader(X_TRACE_ID)).orElse(getRandomTraceId());
+    }
+
+    private String getRandomTraceId() {
+        return UUID.randomUUID().toString();
     }
 }

@@ -1,6 +1,6 @@
 package com.tech.base.exception.advice;
 
-import com.tech.base.response.RpcResponse;
+import com.tech.base.model.Response;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -45,7 +45,7 @@ public class HttpErrorHandler implements ErrorController {
             }
         }
         logger.error("交易不存在url:{}", gurl404);
-        return new RpcResponse<>(404, "访问接口不存在");
+        return new Response<>(404, "访问接口不存在");
     }
 
     private Object getValueByFieldName(HttpServletRequest request, String string) {

@@ -7,18 +7,13 @@ public abstract class BaseException extends RuntimeException {
     private static final long serialVersionUID = -2423279393324395996L;
     protected int code;
 
-    public BaseException(String msg, int code) {
+    public BaseException(int code, String msg) {
         super(msg);
         this.code = code;
     }
 
-    public BaseException(String msg, int code, Throwable cause) {
+    public BaseException(int code, String msg, Throwable cause) {
         super(msg, cause);
-        this.code = code;
-    }
-
-    public BaseException(int code, Throwable cause) {
-        super(cause);
         this.code = code;
     }
 

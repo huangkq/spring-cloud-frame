@@ -1,13 +1,17 @@
 package com.tech.base.config.kafka;
 
+import com.tech.base.utils.kafka.KafkaUtil;
+
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
@@ -15,14 +19,16 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
-import org.springframework.kafka.listener.AbstractMessageListenerContainer.AckMode;
+import org.springframework.kafka.listener.ContainerProperties.AckMode;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@ConditionalOnProperty(name = "use.common.kafka", matchIfMissing = false)
+@ConditionalOnProperty(name = KafkaConfig.NAME, matchIfMissing = false)
 public class KafkaConfig {
+    public final static String NAME = "use.common.kafka";
+
     /**
      * 生产者连接Server地址
      */
@@ -109,6 +115,7 @@ public class KafkaConfig {
     @Value("${common.kafka.consumer.max.partition.fetch.bytes:1048576}")
     private Integer maxPartitionFetchBytes;
 
+    @Primary
     @Bean
     public ProducerFactory<String, Object> producerFactory() {
         Map<String, Object> configs = new HashMap<>(); // 参数
@@ -124,11 +131,15 @@ public class KafkaConfig {
         return new DefaultKafkaProducerFactory<>(configs);
     }
 
+    @Primary
     @Bean
-    public KafkaTemplate<String, Object> kafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory(), true);
+    public KafkaTemplate<String, Object> kafkaTemplate(@Qualifier("producerFactory") ProducerFactory<String, Object> producerFactory) {
+        KafkaTemplate<String, Object> kafkaTemplate = new KafkaTemplate<>(producerFactory, true);
+        KafkaUtil.setKafkaTemplate(kafkaTemplate);
+        return kafkaTemplate;
     }
 
+    @Primary
     @Bean
     public ConsumerFactory<Object, Object> consumerFactory() {
         Map<String, Object> configs = new HashMap<>();
@@ -150,6 +161,14 @@ public class KafkaConfig {
         return new DefaultKafkaConsumerFactory<>(configs);
     }
 
+
+    /**
+     * 添加KafkaListenerContainerFactory 用于批量消费消息 在kafkaListener上需要指定containerFactory =
+     * batchContainerFactory
+     * 
+     * @return
+     */
+    @Primary
     @Bean
     public KafkaListenerContainerFactory<?> batchContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<Object, Object> containerFactory = new ConcurrentKafkaListenerContainerFactory<>();
@@ -166,13 +185,5 @@ public class KafkaConfig {
         // KafkaRebalanceHandler());
         return containerFactory;
     }
-
-    // @Bean
-    // public KafkaListenerContainerFactory<?> containerFactory() {
-    // ContainerProperties containerProperties = new ContainerProperties("test");
-    // KafkaMessageListenerContainer<Object, Object> containerFactory =
-    // new KafkaMessageListenerContainer<>(consumerFactory(), containerProperties);
-    // return containerFactory;
-    // }
 
 }

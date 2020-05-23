@@ -1,8 +1,11 @@
 package com.tech.base.utils.kafka;
 
 import com.tech.base.model.EventDto;
+import com.tech.base.utils.ValidateUtil;
 
 import org.apache.commons.lang3.StringUtils;
+
+import java.time.LocalDateTime;
 
 public class EventDtoBuild<T> extends EventDto<T> {
 
@@ -12,32 +15,27 @@ public class EventDtoBuild<T> extends EventDto<T> {
         super(t);
     }
 
-    public EventDtoBuild(String uuit, String time, T t) {
-        super(uuit, time, t);
+    public EventDtoBuild(String uniqueSerial, LocalDateTime time, T t) {
+        super(uniqueSerial, time, t);
     }
 
-    public EventDtoBuild<T> withUuid(String uuid) {
-        this.setUuid(uuid);
+    public EventDtoBuild<T> withUniqueSerial(String uniqueSerial) {
+        this.setUniqueSerial(uniqueSerial);
         return this;
     }
 
-    public EventDtoBuild<T> withEvent(String event) {
-        this.setEvent(event);
-        return this;
-    }
-
-    public EventDtoBuild<T> withIp(String ip) {
-        this.setIp(ip);
-        return this;
-    }
-
-    public EventDtoBuild<T> withProperties(T data) {
-        this.setProperties(data);
+    public EventDtoBuild<T> withData(T data) {
+        this.setData(data);
         return this;
     }
 
     public EventDtoBuild<T> withTopic(String topic) {
         this.setTopic(topic);
+        return this;
+    }
+
+    public EventDtoBuild<T> withEventType(Integer eventType) {
+        this.setEventType(eventType);
         return this;
     }
 
@@ -48,9 +46,9 @@ public class EventDtoBuild<T> extends EventDto<T> {
     }
 
     public void check() {
-        if (StringUtils.isBlank(this.getEvent())) throw new RuntimeException("event required");
-        if (StringUtils.isBlank(this.getUuid())) throw new RuntimeException("uuid required");
-        if (StringUtils.isBlank(this.getTopic())) throw new RuntimeException("topic required");
+        ValidateUtil.assertTrue(ValidateUtil.isNotNull(this.getEventType()), "event type required");
+        ValidateUtil.assertTrue(StringUtils.isBlank(this.getUniqueSerial()), "uniqueSerial required");
+        ValidateUtil.assertTrue(StringUtils.isBlank(this.getTopic()), "topic required");
     }
 
     /** 发送 */

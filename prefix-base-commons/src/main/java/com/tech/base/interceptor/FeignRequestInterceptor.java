@@ -79,8 +79,12 @@ public class FeignRequestInterceptor implements RequestInterceptor {
      */
     private void initRequestHeader(RequestTemplate requestTemplate) {
         requestTemplate.header(CONTENT_TYPE, APPLICATION_JSON_UTF8);
-        List<String> acceptableMediaTypes = Arrays.asList(MediaType.APPLICATION_JSON.toString(), MediaType.APPLICATION_XML.toString(),
-                MediaType.TEXT_PLAIN.toString(), MediaType.APPLICATION_FORM_URLENCODED.toString(), MediaType.APPLICATION_OCTET_STREAM.toString());
+        
+        List<String> acceptableMediaTypes = Arrays.asList(
+                MediaType.APPLICATION_JSON.toString(), 
+                MediaType.APPLICATION_XML.toString(),
+                MediaType.TEXT_PLAIN.toString(), 
+                MediaType.APPLICATION_OCTET_STREAM.toString());
 
         requestTemplate.header(ACCEPT, acceptableMediaTypes);
         requestTemplate.header(CONNECTION, HTTP_HEADER_CONNECTION_VALUE);
@@ -95,14 +99,14 @@ public class FeignRequestInterceptor implements RequestInterceptor {
      * @param requestTemplate
      */
     private void feignRequestLogging(RequestTemplate requestTemplate) {
-        StringBuilder sb = new StringBuilder(System.lineSeparator());
-        sb.append("Feign request URI : ").append(requestTemplate.url()).append(System.lineSeparator());
-        sb.append("Feign request HEADER : ").append(requestTemplate.headers().toString()).append(System.lineSeparator());
-        String body =
-                requestTemplate.requestBody() == null ? Strings.EMPTY :
-                    new String(requestTemplate.requestBody().asBytes(), Charset.forName("utf-8"));
-        sb.append("Feign request BODY : ").append(body);
-
-        logger.debug("Feign request Info : {}", sb);
+        if (logger.isDebugEnabled()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Feign request URI : ").append(requestTemplate.url());
+            sb.append("Feign request HEADER : ").append(requestTemplate.headers().toString());
+            String body = requestTemplate.requestBody() == null ? Strings.EMPTY
+                    : new String(requestTemplate.requestBody().asBytes(), Charset.forName("utf-8"));
+            sb.append("Feign request BODY : ").append(body);
+            logger.debug("Feign request Info : {}", sb);
+        }
     }
 }

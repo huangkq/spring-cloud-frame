@@ -1,19 +1,17 @@
 package com.tech.base.exception.advice;
 
-import com.tech.base.constants.ResponseConstants;
 import com.tech.base.exception.BaseException;
+import com.tech.base.exception.BaseExceptionCode;
 import com.tech.base.filter.wrapper.RequestWrapper;
-import com.tech.base.response.RpcResponse;
+import com.tech.base.model.Response;
 import com.tech.base.utils.EnvThreadLocal;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.io.IOException;
 import java.util.Enumeration;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,39 +35,59 @@ public class ControllerExceptionAspect {
     @ExceptionHandler(value = Throwable.class)
     @ResponseBody
     public Object errorHandler(HttpServletRequest request, Throwable ex) throws Exception {
-        StringBuilder msg = logRequest((RequestWrapper) request);
+        StringBuilder msg = getRequestContent(request);
         try {
             if (ex instanceof BaseException) {
                 BaseException bex = (BaseException) ex;
                 logger.warn("交易失败:{}", msg, ex);// warn 级别异常
-                return new RpcResponse<>(bex.getCode(), bex.getMessage());
+                return new Response<>(bex.getCode(), bex.getMessage());
             } else {
                 logger.error("交易失败:{}", msg, ex); // error
-                return new RpcResponse<>(ResponseConstants.ERROR_CODE_1000, "交易失败");
+                return new Response<>(BaseExceptionCode.ERROR_CODE_100.getCode(), BaseExceptionCode.ERROR_CODE_100.getMsg());
             }
         } finally {
             EnvThreadLocal.clearCurrentThreadEnv();// 释放
         }
     }
 
-    private StringBuilder logRequest(final RequestWrapper request) throws IOException {
+    private StringBuilder getRequestContent(final HttpServletRequest request) {
         StringBuilder msg = new StringBuilder();
-        msg.append("traceId=").append(request.getTraceId()).append(";");
-        msg.append("method=").append(request.getMethod()).append(";");
-        msg.append("url=").append(request.getRequestURI());
-        if (StringUtils.isNotBlank(request.getQueryString())) {
-            msg.append('?').append(request.getQueryString());
-        }
-        msg.append(";body=").append(request.getBody());
-        Enumeration<String> headerNames = request.getHeaderNames();
-        if (headerNames != null) {
-            msg.append(";headers:{");
-            while (headerNames.hasMoreElements()) {
-                String name = headerNames.nextElement();
-                msg.append(name).append("=").append(request.getHeader(name)).append(",");
+        try {
+            if (request.getMethod() != null) {
+                msg.append("method=").append(request.getMethod()).append(";");
             }
-            msg.append("}");
+            msg.append("url=").append(request.getRequestURI());
+            if (request.getQueryString() != null) {
+                msg.append('?').append(request.getQueryString());
+            }
+            if (request instanceof RequestWrapper && !isMultipart(request) && !isBinaryContent(request)) {
+                RequestWrapper requestWrapper = (RequestWrapper) request;
+                msg.append(";body=").append(requestWrapper.getBody());
+            }
+            if (request.getHeaderNames() != null) {
+                Enumeration<String> headerNames = request.getHeaderNames();
+                msg.append(";headers:{");
+                while (headerNames.hasMoreElements()) {
+                    String name = headerNames.nextElement();
+                    msg.append(name).append("=").append(request.getHeader(name)).append(",");
+                }
+                msg.append("}");
+            }
+        } catch (Exception e) {
+            logger.warn("获取request上下文解析失败:{}", e.getMessage(), e);
         }
         return msg;
+    }
+
+    private boolean isBinaryContent(final HttpServletRequest request) {
+        if (request.getContentType() == null) {
+            return false;
+        }
+        return request.getContentType().startsWith("image") || request.getContentType().startsWith("video")
+                || request.getContentType().startsWith("audio");
+    }
+
+    private boolean isMultipart(final HttpServletRequest request) {
+        return request.getContentType() != null && request.getContentType().startsWith("multipart/form-data");
     }
 }

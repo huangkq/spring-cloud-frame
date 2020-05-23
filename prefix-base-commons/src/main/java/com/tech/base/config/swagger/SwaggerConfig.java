@@ -20,14 +20,14 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @Configuration
 @ConditionalOnProperty(name = "use.common.swagger", matchIfMissing = false)
 @EnableSwagger2
-public class SwaggerConfiguration {
+public class SwaggerConfig {
 
-    private static final Logger logger = LoggerFactory.getLogger(SwaggerConfiguration.class);
+    private static final Logger logger = LoggerFactory.getLogger(SwaggerConfig.class);
 
     @Value("${common.swagger.namespace:unKnown}")
     private String namespace;
 
-    @Value("${common.swagger.scan.package:com.aha.tech.controller}")
+    @Value("${common.swagger.scan.package}")
     private String scanPackage;
 
     @Value("${common.swagger.title:API文档}")

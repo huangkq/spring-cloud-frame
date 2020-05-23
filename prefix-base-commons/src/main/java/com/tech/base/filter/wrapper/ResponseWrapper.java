@@ -6,8 +6,8 @@ import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import com.tech.base.response.RpcResponse;
-import com.tech.base.utils.JacksonUtil;
+import com.tech.base.model.Response;
+import com.tech.base.utils.jackson.JacksonUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -58,7 +58,7 @@ public class ResponseWrapper extends HttpServletResponseWrapper {
     public byte[] getResponseData() throws IOException {
         flushBuffer();
         if (buffer.toByteArray() == null || buffer.toByteArray().length <= 0) {
-            return JacksonUtil.getObjectMapper().writeValueAsBytes(new RpcResponse<>());
+            return JacksonUtil.getObjectMapper().writeValueAsBytes(new Response<>());
         } else {
             return buffer.toByteArray();
         }

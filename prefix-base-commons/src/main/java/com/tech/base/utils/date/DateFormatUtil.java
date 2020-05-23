@@ -6,10 +6,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
 
 public class DateFormatUtil {
+
     public static final String DATE_FORMAT_FULL = "yyyy-MM-dd HH:mm:ss";
     public static final String DATE_FORMAT_SHORT = "yyyy-MM-dd";
     public static final String DATE_FORMAT_COMPACT = "yyyyMMdd";
@@ -46,7 +48,7 @@ public class DateFormatUtil {
         return Date.from(instant);
     }
 
-    public static String dateToString(String pattern, Date date) {
+    public static String dateToString(Date date, String pattern) {
         return new SimpleDateFormat(pattern).format(date);
     }
 
@@ -55,7 +57,7 @@ public class DateFormatUtil {
     }
 
     public static LocalDateTime stringToLocalDateTime(String date, String pattern) {
-        return LocalDateTime.parse(date, DateTimeFormatter.ofPattern(pattern));
+        return LocalDateTime.parse(date, DateTimeFormatter.ofPattern(pattern, Locale.SIMPLIFIED_CHINESE));
     }
 
     public static LocalDate stringToLocalDate(String date) {
@@ -63,7 +65,7 @@ public class DateFormatUtil {
     }
 
     public static LocalDate stringToLocalDate(String date, String pattern) {
-        return LocalDate.parse(date, DateTimeFormatter.ofPattern(pattern));
+        return LocalDate.parse(date, DateTimeFormatter.ofPattern(pattern, Locale.SIMPLIFIED_CHINESE));
     }
 
     public static Date stringToDate(String date, String pattern) {
@@ -73,5 +75,4 @@ public class DateFormatUtil {
             return localDateTimeToDate(stringToLocalDateTime(date, pattern));
         }
     }
-
 }

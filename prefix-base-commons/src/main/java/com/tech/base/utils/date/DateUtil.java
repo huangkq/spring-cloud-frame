@@ -13,6 +13,6 @@ public class DateUtil extends LocalDateUtil {
     }
 
     public static String currentDateStr(String pattern) {
-        return dateToString(pattern, currentDate());
+        return dateToString(currentDate(), pattern);
     }
 }

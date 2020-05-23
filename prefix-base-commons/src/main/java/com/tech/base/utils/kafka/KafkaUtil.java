@@ -1,7 +1,7 @@
 package com.tech.base.utils.kafka;
 
 import com.tech.base.model.EventDto;
-import com.tech.base.utils.JacksonUtil;
+import com.tech.base.utils.jackson.JacksonUtil;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -50,7 +48,7 @@ public class KafkaUtil {
             throw e;
         } catch (Throwable ex) {
             logger.error("[消息发送]发送数据失败sendMessage:{}", data.toString(), ex);
-            throw new RuntimeException("[消息发送]回调响应出现异常uuid:" + data.getUuid());
+            throw new RuntimeException("[消息发送]回调响应出现异常uuid:" + data.getUniqueSerial());
         }
     }
 
@@ -79,14 +77,12 @@ public class KafkaUtil {
      * @return 发送失败的数据sendFailList date:2019年10月25日
      */
     @SuppressWarnings("unchecked")
-    public static <T> T send(EventDtoBatchBuild<?> eventMsgBatch) {
-        List<EventDtoBuild<?>> sendFailList = new ArrayList<>();// 保存失败的数据
-        for (EventDtoBuild<?> data : eventMsgBatch.getEventMsgList()) {
+    public static <T> T send(EventDtoBatchBuild<? extends EventDtoBuild<?>> eventMsgBatch) {
+        EventDtoBatchBuild<EventDtoBuild<?>> sendFailList = new EventDtoBatchBuild<>();// 保存失败的数据
+        eventMsgBatch.forEach(data -> {
             try {
                 data.check();
-                EventDto<?> eventDto = data;
-                String sendMsg = JacksonUtil.objToJson(eventDto);
-
+                String sendMsg = JacksonUtil.objToJson(data);
                 logger.info("[消息发送]发送数据key:{},sendMsg:{}", data.getKey(), sendMsg);
                 org.springframework.util.concurrent.ListenableFuture<SendResult<String, Object>> send =
                         kafkaTemplate.send(data.getTopic(), data.getKey(), sendMsg);
@@ -101,12 +97,12 @@ public class KafkaUtil {
                 logger.error("[消息发送]发送数据异常sendMsg:{},error:{}", JacksonUtil.objToJson(data), e.getMessage(), e);
                 sendFailList.add(data);
             }
-        }
+        });
         try {
             kafkaTemplate.flush();// flush 内部会一直等待30秒(CountDownLatch)，消息完成发送抵达
         } catch (Exception e) {
             logger.error("send kafka error:{}", e.getMessage(), e);
-            return (T) eventMsgBatch.getEventMsgList();
+            return (T) eventMsgBatch;
         }
         return (T) sendFailList;
     }
@@ -115,11 +111,11 @@ public class KafkaUtil {
      * 构造消息体对象，链式添加属性，和发送
      */
     public static <T> EventDtoBuild<T> buildEventMsg(T t) {
-        return new EventDtoBuild<T>(t);
+        return new EventDtoBuild<>(t);
     }
 
     /** 构造批量消息对象 */
-    public static <T> EventDtoBatchBuild<T> buildEventMsgBatch() {
-        return new EventDtoBatchBuild<T>();
+    public static <T> EventDtoBatchBuild<EventDtoBuild<T>> buildEventMsgBatch() {
+        return new EventDtoBatchBuild<>();
     }
 }

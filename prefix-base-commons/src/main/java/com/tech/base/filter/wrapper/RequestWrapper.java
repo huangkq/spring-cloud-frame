@@ -16,16 +16,11 @@ import javax.servlet.http.HttpServletRequestWrapper;
 
 public class RequestWrapper extends HttpServletRequestWrapper {
 
-    private final static String X_TRACE_ID = "x-trace-id";
     private final byte[] body;
-    private String traceId;
-    private long startMillis;
 
     public RequestWrapper(HttpServletRequest request) throws IOException {
         super(request);
-        this.traceId = request.getHeader(X_TRACE_ID);
         this.body = IOUtils.toByteArray(request.getInputStream());
-        this.startMillis = System.currentTimeMillis();
     }
 
     @Override
@@ -55,14 +50,6 @@ public class RequestWrapper extends HttpServletRequestWrapper {
                 return byteArrayInputStream.read();
             }
         };
-    }
-
-    public String getTraceId() {
-        return traceId;
-    }
-
-    public long getStartMillis() {
-        return startMillis;
     }
 
     public String getBody() {

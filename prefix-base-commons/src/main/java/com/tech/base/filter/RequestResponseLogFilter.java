@@ -39,14 +39,13 @@ public class RequestResponseLogFilter extends OncePerRequestFilter {
         } else {
             StringBuilder logRequest = logRequest((RequestWrapper) request);
             filterChain.doFilter(request, response);
-            logResponse((ResponseWrapper) response, logRequest, ((RequestWrapper) request).getStartMillis());
+            logResponse((ResponseWrapper) response, logRequest);
             logger.info(logRequest.toString());
         }
     }
 
     private StringBuilder logRequest(final RequestWrapper request) throws IOException {
         StringBuilder msg = new StringBuilder(REQUEST_PREFIX);
-        msg.append("traceId=").append(request.getTraceId()).append(";");
         msg.append("method=").append(request.getMethod()).append(";");
         msg.append("url=").append(request.getRequestURI());
         if (StringUtils.isNotBlank(request.getQueryString())) {
@@ -65,21 +64,16 @@ public class RequestResponseLogFilter extends OncePerRequestFilter {
         return msg;
     }
 
-    private void logResponse(ResponseWrapper response, StringBuilder msg, long startMillis) throws IOException {
-        msg.append(RESPONSE_PREFIX);
+    private void logResponse(ResponseWrapper response, StringBuilder msg) throws IOException {
         if (logger.isDebugEnabled()) {
             msg.append(";");
-            msg.append(RESPONSE_PREFIX);
-            msg.append(";response=").append(new String(response.getResponseData(), StandardCharsets.UTF_8));
+            msg.append(RESPONSE_PREFIX)//
+                    .append(new String(response.getResponseData(), StandardCharsets.UTF_8));
         }
-        msg.append(";处理时间:").append((System.currentTimeMillis() - startMillis));
     }
 
     /**
      * 是否跳过日志输出
-     * 
-     * @param uri
-     * @return
      */
     private Boolean skipLogging(String uri) {
         return uri.contains("prometheus")//

@@ -11,7 +11,7 @@ public class LocalDateUtil extends DateFormatUtil {
         return LocalDate.now(DEFAULT_TIME_ZONE.toZoneId());
     }
 
-    private static LocalDateTime currentLocalDateTime() {
+    public static LocalDateTime currentLocalDateTime() {
         return LocalDateTime.now(DEFAULT_TIME_ZONE.toZoneId());
     }
 
